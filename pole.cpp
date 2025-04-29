@@ -20,22 +20,23 @@ int main(int argc, char const *argv[])
 
     delete[] p2;
 
-    std::cout << A << std::endl;
-
-
-
-
-    std::ifstream fileB;
-    Pole<double> B;
-
-    fileB.open(argv[1]);
-
-    fileB >> B;
-
-    Pole<double> C = A + B;
-
+    Pole<double> C = A + 1.0;
 
     std::cout << C << std::endl;
+
+
+
+    // std::ifstream fileB;
+    // Pole<double> B;
+
+    // fileB.open(argv[1]);
+
+    // fileB >> B;
+
+    // Pole<double> C = A + B;
+
+
+    // std::cout << C << std::endl;
 
 
     return 0;

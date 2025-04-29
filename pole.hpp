@@ -14,7 +14,7 @@ public:
         switch (eNum)
         {
         case 3:
-            std::cerr << "Rozdílná velikost polí!" << std::endl;
+            std::cerr << "Chyba při čtení elementů ze streamu." << std::endl;
             break;
         
         default:
@@ -61,16 +61,27 @@ public:
     T* operator[](int i) {
         return e[i];
     }
-
-    template<class P> friend std::ostream& operator<<(std::ostream &out, Pole<P> &X) {
-        std::cout << '[';
-        for (size_t i = 0; i < X.l; i++) {
-            std::cout << X.e[i];
-            if (i != (X.l-1)) {
-                std::cout << ",";
+    Pole<T>& operator=(const Pole<T>& X) { // copy-assignment operator
+        if (this != &X) {
+            delete[] e;
+            l = X.l;
+            e = new T[l];
+            for (size_t i = 0; i < l; i++) {
+                e[i] = X.e[i];
             }
         }
-        std::cout << "]";
+        return *this;
+    }
+
+    template<class P> friend std::ostream& operator<<(std::ostream &out, Pole<P> &X) {
+        out << '[';
+        for (size_t i = 0; i < X.l; i++) {
+            out << X.e[i];
+            if (i != (X.l-1)) {
+                out << ",";
+            }
+        }
+        out << "]";
         return out;
     }
     template<class P> friend std::istream& operator>>(std::istream &in, Pole<P> &X) {   
@@ -85,9 +96,15 @@ public:
             temp++;
         }
 
+        if (iss.fail() && !iss.eof()) {
+            Exception err(3);
+            std::cout << "Chyba načítání pole!" << std::endl;
+            err.throwE();
+        }
+
         delete[] X.e;
         X.l = temp;
-        X.e = new T[temp];
+        X.e = new P[temp];
 
         iss.clear(); // reset
         iss.str(line);
@@ -101,15 +118,17 @@ public:
         return in;
     }
     friend Pole<T> operator+(const Pole<T> &X, const Pole<T> &Y) {
-        if (X.l != Y.l) {
-            Exception err(3);
-            std::cout << "ERROR! Chyba při sčítání dvou polí.";
-            err.throwE();
-        }
-        int len = X.l;
+        const Pole<T>& longer = (X.l >= Y.l) ? X : Y;
+        const Pole<T>& shorter = (X.l < Y.l) ? X : Y;
+
+        int len = longer.l;
         Pole<T> result(len);
         for (size_t i = 0; i < len; i++) {
-            result.e[i] = X.e[i] + Y.e[i];
+            result.e[i] = longer.e[i];
+        }
+
+        for (size_t i = 0; i < shorter.l; i++) {
+            result.e[i] += shorter.e[i];
         }
         
         return result;
