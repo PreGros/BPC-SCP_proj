@@ -35,11 +35,9 @@ public:
         l = 0;
         e = nullptr;
     }
-    Pole(int len) {
+    Pole(int len, T* arr) {
+        e = new T[len];
         l = len;
-        e = new T[l];
-    }
-    Pole(int len, T* arr) : Pole(len) {
         for (size_t i = 0; i < l; i++) {
             e[i] = arr[i];
         }
@@ -51,8 +49,9 @@ public:
             e[i] = X.e[i];
         }
     }
-    Pole(T value) : Pole(1) { // converse-constructor
+    Pole(T value) { // converse-constructor
         l = 1;
+        e = new T[1];
         e[0] = value;
     }
     ~Pole() {
@@ -122,7 +121,9 @@ public:
         const Pole<T>& shorter = (X.l < Y.l) ? X : Y;
 
         int len = longer.l;
-        Pole<T> result(len);
+        Pole<T> result;
+        result.l = len;
+        result.e = new T[len];
         for (size_t i = 0; i < len; i++) {
             result.e[i] = longer.e[i];
         }
