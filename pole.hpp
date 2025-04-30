@@ -16,6 +16,14 @@ public:
         case 3:
             std::cerr << "Chyba při čtení elementů ze streamu." << std::endl;
             break;
+
+        case 4:
+            std::cerr << "Dělení nulou!" << std::endl;
+            break;
+
+        case 5:
+            std::cerr << "Rozdílná velikost polí!" << std::endl;
+            break;
         
         default:
             std::cerr << "Nastala chyba! Nepovím jaká! (Výchozí chyba)" << std::endl;
@@ -71,8 +79,34 @@ public:
         }
         return *this;
     }
+    template<typename Op> bool applyEOperation(const Pole<T> &X, Op operation) {
+        if (l != X.l) {
+            return false;
+        }
+        for (size_t i = 0; i < l; i++) {
+            if (!operation(e[i], X.e[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    bool operator==(const Pole<T> &X) {
+        return applyEOperation(X, [](T a, T b) { return a == b; });
+    }
+    bool operator!=(const Pole<T> &X) {
+        return !(*this == X);
+    }
 
-    template<class P> friend std::ostream& operator<<(std::ostream &out, Pole<P> &X) {
+    Pole<T> operator-() {
+        Pole<T> result(l,e);
+        for (size_t i = 0; i < l; i++) {
+            result.e[i] = -result.e[i];
+        }
+        return result;
+    }
+
+
+    template<class P> friend std::ostream& operator<<(std::ostream &out, const Pole<P> &X) {
         out << '[';
         for (size_t i = 0; i < X.l; i++) {
             out << X.e[i];
@@ -116,7 +150,8 @@ public:
 
         return in;
     }
-    friend Pole<T> operator+(const Pole<T> &X, const Pole<T> &Y) {
+
+    template<typename Op> friend Pole<T> applyAOperation(const Pole<T> &X, const Pole<T> &Y, Op operation) {
         const Pole<T>& longer = (X.l >= Y.l) ? X : Y;
         const Pole<T>& shorter = (X.l < Y.l) ? X : Y;
 
@@ -128,10 +163,38 @@ public:
             result.e[i] = longer.e[i];
         }
 
-        for (size_t i = 0; i < shorter.l; i++) {
-            result.e[i] += shorter.e[i];
-        }
-        
+        if (shorter.l == 1) // if one of the args is type T, then apply operation to all longer elems with single value (from arg with type T)
+            for (size_t i = 0; i < longer.l; i++)
+                result.e[i] = operation(result.e[i], shorter.e[0]);    
+        else
+            for (size_t i = 0; i < shorter.l; i++)
+                result.e[i] = operation(result.e[i], shorter.e[i]);
+
         return result;
     }
+
+    friend Pole<T> operator+(const Pole<T> &X, const Pole<T> &Y) {
+        return applyAOperation(X, Y, [](T a, T b) { return a + b; });
+    }
+
+    friend Pole<T> operator-(const Pole<T> &X, const Pole<T> &Y) {
+        return applyAOperation(X, Y, [](T a, T b) { return a - b; });
+    }
+
+    friend Pole<T> operator*(const Pole<T> &X, const Pole<T> &Y) {
+        return applyAOperation(X, Y, [](T a, T b) { return a * b; });
+    }
+
+    friend Pole<T> operator/(const Pole<T> &X, const Pole<T> &Y) {
+        return applyAOperation(X, Y, [](T a, T b) {
+            if (b == 0) {
+                Exception err(4);
+                std::cout << "ERROR! Chyba při binární operaci nad dvě poli.";
+                err.throwE();
+            }
+            return a / b;
+        });
+    }
+
+    
 };
