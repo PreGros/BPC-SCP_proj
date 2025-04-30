@@ -10,12 +10,13 @@
 
 int main(int argc, char const *argv[])
 {
-    int delka = 4;
+    int delka = 5;
     double *p2 = new double[delka];
-    p2[0] = 0.0;
+    p2[0] = 0.5;
     p2[1] = 5.0;
     p2[2] = 10.0;
     p2[3] = 25.0;
+    p2[4] = 150.0;
     
     Pole<double> A(delka, p2);
 
@@ -31,25 +32,10 @@ int main(int argc, char const *argv[])
 
     fileB >> B;
 
-    Pole<double> C = A + B * 10;
-
-    std::string odpoved;
-
-    if (A == B) {
-        odpoved = "Ano, rovna";
-    }
-    else {
-        odpoved = "Ne, nerovna";
-    }
+    Pole<double> C = B / A;
     
     std::cout << C << std::endl;
 
-    std::ofstream fileC;
-    fileC.open("output.txt");
-
-    fileC << C;
-
-    fileC.close();
 
     return 0;
 }

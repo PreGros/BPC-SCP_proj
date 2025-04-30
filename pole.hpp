@@ -165,10 +165,16 @@ public:
 
         if (shorter.l == 1) // if one of the args is type T, then apply operation to all longer elems with single value (from arg with type T)
             for (size_t i = 0; i < longer.l; i++)
-                result.e[i] = operation(result.e[i], shorter.e[0]);    
+                if (Y.l == 1)
+                    result.e[i] = operation(result.e[i], shorter.e[0]);   
+                else
+                    result.e[i] = operation(shorter.e[0], result.e[i]); 
         else
             for (size_t i = 0; i < shorter.l; i++)
-                result.e[i] = operation(result.e[i], shorter.e[i]);
+                if (&X == &longer)
+                    result.e[i] = operation(result.e[i], shorter.e[i]);
+                else
+                    result.e[i] = operation(shorter.e[i], result.e[i]);
 
         return result;
     }
@@ -196,5 +202,5 @@ public:
         });
     }
 
-    
+
 };
