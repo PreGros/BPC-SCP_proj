@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <math.h>
 
 class Exception {
     int eNum;
@@ -22,7 +23,11 @@ public:
             break;
 
         case 5:
-            std::cerr << "Rozdílná velikost polí!" << std::endl;
+            std::cerr << "Velikost pole je 0!" << std::endl;
+            break;
+
+        case 6:
+            std::cerr << "Obě pole mají nulovou délku!" << std::endl;
             break;
         
         default:
@@ -68,6 +73,105 @@ public:
     T* operator[](int i) {
         return e[i];
     }
+
+    T sum() {
+        if (l == 0) {
+            Exception err(5);
+            std::cout << "Chyba při výpočtu součtu." << std::endl;
+            err.throwE();
+        }
+        T sum = T();
+        for (size_t i = 0; i < l; i++) {
+            sum += e[i];
+        }
+        return sum;
+    }
+
+    double mean() {
+        if (l == 0) {
+            Exception err(5);
+            std::cout << "Chyba při výpočtu průměru." << std::endl;
+            err.throwE();
+        }
+        return sum() / l;
+    }
+
+    double stddev() {
+        if (l == 0) {
+            Exception err(5);
+            std::cout << "Chyba při výpočtu průměru." << std::endl;
+            err.throwE();
+        }
+        double meanVal = mean();
+        double var = 0.0;
+        for (size_t i = 0; i < l; i++) {
+            var += pow(e[i] - meanVal, 2);
+        }
+        var /= l;
+        return sqrt(var);
+    }
+
+    void sortA() {
+        if (l == 0) {
+            Exception err(5);
+            std::cout << "Chyba při seřazování pole!";
+            err.throwE();
+        }
+        for (size_t i = 0; i < l - 1; i++) {
+            for (size_t j = 0; j < l - i - 1; j++) {
+                if (e[j] > e[j + 1]) {
+                    T temp = e[j];
+                    e[j] = e[j + 1];
+                    e[j + 1] = temp;
+                }
+            }
+        }
+    }
+
+    void sortD() {
+        if (l == 0) {
+            Exception err(5);
+            std::cout << "Chyba při seřazování pole!" << std::endl;
+            err.throwE();
+        }
+        for (size_t i = 0; i < l - 1; i++) {
+            for (size_t j = 0; j < l - i - 1; j++) {
+                if (e[j] < e[j + 1]) {
+                    T temp = e[j];
+                    e[j] = e[j + 1];
+                    e[j + 1] = temp;
+                }
+            }
+        }
+    }
+
+    Pole<T> concat(const Pole<T> &X) {
+        if (!l || !X.l) {
+            if (!l && !X.l) {
+                Exception err(6);
+                std::cout << "Chyba při konkatenaci polí!" << std::endl;
+                err.throwE();
+            }
+            else if (!l) {
+                return Pole<T>(X.l, X.e);
+            }
+            else {
+                return Pole<T>(l, e);
+            }
+        }
+        
+        Pole<T> result;
+        result.l = l + X.l;
+        result.e = new T[result.l];
+        for (size_t i = 0; i < l; i++) {
+            result.e[i] = e[i];
+        }
+        for (size_t i = 0; i < X.l; i++) {
+            result.e[l + i] = X.e[i];
+        }
+        return result;
+    }
+
     Pole<T>& operator=(const Pole<T>& X) { // copy-assignment operator
         if (this != &X) {
             delete[] e;
@@ -191,6 +295,10 @@ public:
         return applyAOperation(X, Y, [](T a, T b) { return a * b; });
     }
 
+    friend Pole<T> operator%(const Pole<T> &X, const Pole<T> &Y) {
+        return applyAOperation(X, Y, [](T a, T b) { return a % b; });
+    }
+
     friend Pole<T> operator/(const Pole<T> &X, const Pole<T> &Y) {
         return applyAOperation(X, Y, [](T a, T b) {
             if (b == 0) {
@@ -201,6 +309,4 @@ public:
             return a / b;
         });
     }
-
-
 };
